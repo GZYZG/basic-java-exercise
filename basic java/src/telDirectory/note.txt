@@ -1,0 +1,7 @@
+1.创建一定透明度的窗口：
+	控件按如下方式添加：
+		pane->scene->stage
+		需要的设置如示：
+		pane.setStyle("-fx-background:transparent;-fx-background-color: rgba(255,255,255,0.85);" )，该窗口的透明度是0.85
+		scene.setFill(null);
+		stage.initStyle(StageStyle.TRANSPARENT);

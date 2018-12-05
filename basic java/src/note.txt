@@ -1,0 +1,34 @@
+1.对于javafx的ComboBox，要想获得它的选定的那一个，可以先获得它的索引：
+  combobox.getSelectionModel().getSelectedIndex();
+  或者通过(Type)month.getSelectionModel().getSelectedItem()来获得选项
+  
+  
+2.V[H]Box.setMargin(node:Node, value:Insets):void
+	可以用来设置面板中的节点的外边距，即这个节点与其他节点的距离
+	
+3.设置TextField中文本的字体颜色：
+	.text-input {
+	    -fx-text-fill: -fx-text-inner-color;
+	    -fx-highlight-fill: derive(-fx-control-inner-background,-20%);
+	    -fx-highlight-text-fill: -fx-text-inner-color;
+	    -fx-prompt-text-fill: derive(-fx-control-inner-background,-30%);
+	    -fx-background-color: linear-gradient(to bottom, derive(-fx-text-box-border, -10%), -fx-text-box-border),
+	        linear-gradient(from 0px 0px to 0px 5px, derive(-fx-control-inner-background, -9%), -fx-control-inner-background);
+	    -fx-background-insets: 0, 1;
+	    -fx-background-radius: 3, 2;
+	    -fx-cursor: text;
+	    -fx-padding: 0.333333em 0.583em 0.333333em 0.583em; /* 4 7 4 7 */
+	    -fx-font-size: 16px;
+	}
+	.text-input:focused {
+	    -fx-highlight-fill: -fx-accent;
+	    -fx-highlight-text-fill: white;
+	    -fx-background-color: 
+	    -fx-focus-color,
+	    -fx-control-inner-background,
+	    -fx-faint-focus-color,
+	        linear-gradient(from 0px 0px to 0px 5px, derive(-fx-control-inner-background, -9%), -fx-control-inner-background);
+	    -fx-background-insets: -0.2, 1, -1.4, 3;
+	    -fx-background-radius: 3, 2, 4, 0;
+	    -fx-prompt-text-fill: transparent;
+	}
