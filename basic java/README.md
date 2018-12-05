@@ -10,6 +10,7 @@ basic java/src/ 这个目录中的每一个目录都是一个package，都是一
 	basic java/src/server_multi_clients：实现一个服务器端和多个客户端的网络程序
 	basic java/src/telDirectory：一个电话簿
 	basic java/src/time：预期是做一个处理时间的包
+	basic java/src/couponCollection：来源于 Java语言程序设计（基础篇） 中的一道课后题，优惠券收集人问题的仿真模拟
 	
 
 在project中会用到很多文件，这些文件在 basic java/resource/ 文件夹下都可以找到
