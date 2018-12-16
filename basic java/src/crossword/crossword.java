@@ -57,7 +57,7 @@ public class crossword extends Application{
 	
 	//…Ë÷√ŒËÃ®
 	public void initStage(Stage stage) {
-		String iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/2018.9/basic%20java/resources/Game_Controller_32px.png";
+		String iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/Game_Controller_32px.png";
 		Image mainicon = new Image(iconpath);
 		stage.getIcons().add(mainicon);
 		stage.setTitle("crossword");

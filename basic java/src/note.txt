@@ -32,3 +32,40 @@
 	    -fx-background-radius: 3, 2, 4, 0;
 	    -fx-prompt-text-fill: transparent;
 	}
+	
+	
+4. 关于javafx的菜单：
+	菜单和菜单项可以与选择选项快捷键组合，称为键盘快捷键。
+	必须创建一个菜单栏javafx.scene.control.MenuBar对象来保存javafx.scene.control.Menu对象。
+	菜单对象可以包含Menu和javafx.scene.control.MenuItem对象。
+	菜单可以包含其他菜单作为子菜单。
+	MenuItems是Menu对象内的子选项。
+	Menu类是MenuItem的子类，它有一个getItems().add()方法，它能够添加诸如其他Menu和MenuItem实例的子元素。
+	
+5. setViewOrder 可以解决控件遮挡问题，order小的优先级更高
+
+6. javafx中，假设已经有对象A，对象B用A来设置自己的某个属性，若另一对象C也使用A来设置自己的属性，则B用A来设置的属性可能会失效
+	例如：
+		A:ImageView
+		B:Button
+		C:Button
+		B.setGraphics(A);
+		C.setGraphics(A);
+		此时A按钮的图片背景会失效
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
