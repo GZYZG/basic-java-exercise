@@ -41,6 +41,7 @@ public class test extends Application{
 		VBox mainPane = new VBox();
 		Scene mainScene = new Scene(mainPane, stage.getWidth(), stage.getHeight());
 		stage.setScene(mainScene);
+		
 		initMainPane(mainPane, stage);
 		
 		MenuBar menuBar = this.createMenuBar(stage);
@@ -69,18 +70,29 @@ public class test extends Application{
 		
 		//在菜单栏中添加菜单:文件菜单 ==> 创建文件、保存文件、退出
 		Menu fileMenu = new Menu("文件");
+		
 		MenuItem newFileItem = new MenuItem("新建");
 		String iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/addfile_16px.png";
-		ImageView openfile = new ImageView(iconpath);
-		newFileItem.setGraphic(openfile);
+		newFileItem.setGraphic(new ImageView(iconpath));
+		
 		MenuItem openFileItem = new MenuItem("打开");
+		iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/openfile_16px.png";
+		openFileItem.setGraphic(new ImageView(iconpath));
+		
 		MenuItem saveFileItem = new MenuItem("保存");
+		iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/savefile_16px.png";
+		saveFileItem.setGraphic(new ImageView(iconpath));
+		
 		MenuItem exitItem = new MenuItem("退出");
+		iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/exit_16px.png";
+		exitItem.setGraphic(new ImageView(iconpath));
+		exitItem.setOnAction(e->{
+			stage.close();
+		});
 		fileMenu.getItems().addAll(newFileItem, openFileItem,
 				saveFileItem, exitItem);
 		iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/file_24px.png";
-		ImageView icon = new ImageView(iconpath);
-		fileMenu.setGraphic(icon);
+		fileMenu.setGraphic(new ImageView(iconpath));
 		
 		menubar.setEffect(new Blend());
 		

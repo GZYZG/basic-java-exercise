@@ -51,7 +51,7 @@ class ToolsPane extends HBox{
 	
 	private static String selectedBrush = "";
 	private static String selectedLineType = "";
-	private static String selectedShape = "";
+	private static String selectedShape = "³¤·½ÐÎ";
 	private static Color selectedColor = null;
 	
 	private Accordion brush;
