@@ -3,6 +3,7 @@ package MyPaint;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -23,15 +24,29 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import MyPaint.ToolsPane;
 import MyPaint.winattr;
+import MyPaint.WRObject2File;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+
 import MyPaint.MyCanvas;
 
 public class test extends Application{
-
+	static MyCanvas canvas;
+	static ArrayList<Shape> allShapeChosed;
 	@SuppressWarnings("static-access")
 	@Override
 	public void start(Stage stage) throws Exception {
@@ -52,7 +67,7 @@ public class test extends Application{
 		mainPane.getChildren().add(toolsBar);
 		mainPane.setMargin(toolsBar, new Insets(5,5,5,5));
 		
-		MyCanvas canvas = this.createMyCanvas(stage, toolsBar);
+		canvas = this.createMyCanvas(stage, toolsBar);
 
 		mainPane.getChildren().add(canvas);
 		mainPane.setMargin(canvas, new Insets(5,5,5,5));
@@ -70,18 +85,26 @@ public class test extends Application{
 		
 		//在菜单栏中添加菜单:文件菜单 ==> 创建文件、保存文件、退出
 		Menu fileMenu = new Menu("文件");
-		
-		MenuItem newFileItem = new MenuItem("新建");
-		String iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/addfile_16px.png";
-		newFileItem.setGraphic(new ImageView(iconpath));
+		String iconpath;
+		//MenuItem newFileItem = new MenuItem("新建");
+		//String iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/addfile_16px.png";
+		//newFileItem.setGraphic(new ImageView(iconpath));
 		
 		MenuItem openFileItem = new MenuItem("打开");
 		iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/openfile_16px.png";
 		openFileItem.setGraphic(new ImageView(iconpath));
+		openFileItem.setOnAction(openEvt->{
+			this.readShape(stage);
+		});
 		
 		MenuItem saveFileItem = new MenuItem("保存");
 		iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/savefile_16px.png";
 		saveFileItem.setGraphic(new ImageView(iconpath));
+		saveFileItem.setOnAction(save->{
+			System.out.println(canvas.getAllChosedShape());
+			this.allShapeChosed = this.canvas.getAllChosedShape();
+			this.saveShape(stage);
+		});
 		
 		MenuItem exitItem = new MenuItem("退出");
 		iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/exit_16px.png";
@@ -89,7 +112,7 @@ public class test extends Application{
 		exitItem.setOnAction(e->{
 			stage.close();
 		});
-		fileMenu.getItems().addAll(newFileItem, openFileItem,
+		fileMenu.getItems().addAll(/*newFileItem,*/ openFileItem,
 				saveFileItem, exitItem);
 		iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/file_24px.png";
 		fileMenu.setGraphic(new ImageView(iconpath));
@@ -135,6 +158,50 @@ public class test extends Application{
 		main_pane.prefHeightProperty().bind(stage.heightProperty());
 		main_pane.prefWidthProperty().bind(stage.widthProperty());
 		main_pane.setStyle("-fx-background-color: rgba(230,230,230);" );
+	}
+	
+	//点击形状时，弹出文件选择器，并进行文件保存
+	@SuppressWarnings("deprecation")
+	public void saveShape(Stage stage) {
+		FileChooser filePicker = new FileChooser();
+		filePicker.setTitle("保存形状");
+		filePicker.getExtensionFilters().add(new ExtensionFilter("Shape", "*.s","*.shape","*.SHAPE","*.Shape"));
+		
+		File f = null; 
+		
+		f = filePicker.showSaveDialog(stage);
+		//filePicker.showOpenDialog(stage);
+		if ( f == null) {
+			//默认保存在项目的根目录下
+			Date date = new Date();
+			f = new File("Shape_"+date.getYear()+"_"+date.getMonth()+"_"+date.getDay()+
+					"_"+date.getHours()+"_"+date.getMinutes()+"_"+date.getSeconds()+".shape");
+		}
+		WRObject2File.writeObject2File(this.allShapeChosed, f.getPath());
+		System.out.println("write path:"+f.getPath());
+	}
+	
+	//读取已经保存的形状对象
+	public void readShape(Stage stage) {
+		FileChooser filePicker = new FileChooser();
+		filePicker.setTitle("读取形状");
+		filePicker.getExtensionFilters().add(new ExtensionFilter("Shape", "*.s","*.shape","*.SHAPE","*.Shape"));
+		
+		File f = null; 
+		
+		//f = filePicker.showSaveDialog(stage);
+		f = filePicker.showOpenDialog(stage);
+		if ( f == null) {
+			//默认保存在项目的根目录下
+			return;
+		}
+		ArrayList<Shape> shapes = WRObject2File.readFromFile(f.getPath());
+		for (Shape s:shapes) {
+			this.canvas.getChildren().add(s);
+			System.out.println(s+"");
+		}
+
+		System.out.println("read path:"+f.getPath());
 	}
 	
 	

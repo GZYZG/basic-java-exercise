@@ -3,8 +3,11 @@ package MyPaint;
 
 
 
+import java.util.ArrayList;
+
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.TextArea;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.ImageView;
@@ -26,10 +29,12 @@ final class MyCanvas extends Pane {
 	private static int clickedTimes = 0;
 	private double x;
 	private double y;
+	private TextArea input = null;
 	private static Shape shape = null;
 	private static Shape dragged = null;
 	private static Shape chosedShape = null;
 	private static winattr attr = new winattr();
+	private static ArrayList<Shape> allChosedShapes;
 	
 	public MyCanvas(Stage stage, ToolsPane tool) {
 		super();
@@ -42,7 +47,7 @@ final class MyCanvas extends Pane {
 		this.setViewOrder(5);
 		this.setCursor(Cursor.cursor("CROSSHAIR"));
 		this.bindEvents4Canvas();
-		
+		this.allChosedShapes = new ArrayList<>();
 	}
 	
 	public MyCanvas(Stage stage, double width, double height) {
@@ -55,11 +60,38 @@ final class MyCanvas extends Pane {
 	
 	@SuppressWarnings("static-access")
 	public void bindEvents4Canvas() {
+		
 		this.setOnMousePressed(pe->{
 			this.startPaint = true;
 			System.out.println("start");
 			this.x = pe.getX();
 			this.y = pe.getY();
+			if (this.startPaint && !this.isChosedShape && this.tool.getSelectedShape().equals("文本") && this.clickedTimes == 0) {
+				if (this.input != null) {
+					
+					Shape shapeObj = new MyText(input.getTranslateX(), input.getTranslateY()+input.getHeight(), 
+							input.getText(), new Font(this.tool.getSelectedFontFamily(), this.tool.getSelectedFontSize()), 
+							this.tool.getSelectedLineType(), this.tool.getSelectedColor(), null);
+					this.getChildren().remove(this.input);
+					this.getChildren().add(shapeObj);
+					this.bindEvents4Shape(shapeObj);
+					this.input = null;
+				}else {
+					this.input = new TextArea();
+					this.input.setPrefHeight(this.tool.getSelectedFontSize());
+					this.input.setPrefWidth(30);
+					this.input.setTranslateX(this.x);
+					this.input.setTranslateY(this.y);
+					this.getChildren().add(this.input);
+				}
+
+			}/*
+			if (!this.startPaint) {
+				if( this.input != null) {
+					this.getChildren().remove(this.input);
+				}
+			}*/
+			
 		});
 		
 		this.setOnMouseDragged(mouseDraggedEvt->{
@@ -105,16 +137,17 @@ final class MyCanvas extends Pane {
 				}
 				if ( shapeType.equals("三角形")) {
 					//画三角形
-					//shapeObj = new MyCircle();
+					shapeObj = new MyPolygon(lineWidth, lineColor, null, 
+							this.x, this.y, 
+							mouseDraggedEvt.getX(), mouseDraggedEvt.getY(),
+							2*this.x-mouseDraggedEvt.getX(), mouseDraggedEvt.getY());
 				}
-				if ( shapeType.equals("文本")) {
-					//写文本
-					shapeObj = new MyText(this.x, this.y, "text", new Font("Consolas", 20), lineWidth, lineColor, null);
+				
+				if ( shapeObj != null) {
+					this.getChildren().add(shapeObj);
+					this.shape = shapeObj;
 				}
 					
-				
-				this.getChildren().add(shapeObj);
-				this.shape = shapeObj;	
 				
 			}
 		
@@ -142,13 +175,25 @@ final class MyCanvas extends Pane {
 	}
 
 	public void bindEvents4Shape(Node shape) {
+		
 		shape.setOnMousePressed(clickEvt->{
+			if (this.chosedShape != shape) {
+				this.clickedTimes = 0;
+			}
+			
+			
+			
 			MyCanvas.clickedTimes ++;
-			System.out.println("i am clicked by mouse "+MyCanvas.clickedTimes+" times "
-					+ " X:"+((Copy)shape).getPosX() + " Y:"+((Copy)shape).getPosY());
+			//System.out.println("i am clicked by mouse "+MyCanvas.clickedTimes+" times "
+			//		+ " X:"+((Copy)shape).getPosX() + " Y:"+((Copy)shape).getPosY());
 			if ( MyCanvas.clickedTimes == 1) {
 				this.x = clickEvt.getX();
 				this.y = clickEvt.getY();
+				shape.setEffect(attr.ds);
+				if ( !this.allChosedShapes.contains(shape) ) {
+					this.allChosedShapes.add((Shape) shape);
+				} 
+				this.chosedShape = (Shape)shape;
 				return;
 			}
 			
@@ -156,24 +201,35 @@ final class MyCanvas extends Pane {
 				MyCanvas.clickedTimes = 0;
 				MyCanvas.isChosedShape = true;
 				
-				shape.setEffect(attr.ds);
-				this.chosedShape = (Shape)shape;
+				
+				//this.chosedShape = (Shape)shape;
 				return;
 			}	
+			if ( this.input != null) {
+				this.getChildren().remove(this.input);
+			}
 		});
 		
 		
 		shape.setOnMouseDragged(dragEvt->{
 			if ( MyCanvas.isChosedShape) {
-				double offsetX = dragEvt.getX() - this.x;
-				double offsetY = dragEvt.getY() - this.y;
 				
 				if ( this.dragged != null && this.getChildren().contains(this.dragged) ) {
 					this.getChildren().remove( this.dragged );
 				}
-				System.out.println("type:"+shape.getClass());
-				Shape newShape = (((Copy) shape).deepCopy( ((Copy)shape).getPosX()+offsetX, 
-																((Copy)shape).getPosY()+offsetY ));
+				double offsetX = dragEvt.getX() - this.x;
+				double offsetY = dragEvt.getY() - this.y;
+				
+				double[] pos = ((Copy)shape).getPos();
+				double[] points = new double[pos.length];
+				for (int i = 0; i < points.length; i += 2) {
+					points[i] = pos[i]+offsetX;
+					points[i+1] = pos[i+1]+offsetY;
+					//System.out.println("x:"+points[i]+"  y:"+points[i+1]);
+				}
+				//System.out.println("points.len:"+points.length +"  offsetX:"+offsetX+"  offsetY:"+offsetY+"  this.x:"+this.x+"  this.y:"+this.y);
+	
+				Shape newShape = ((Copy) shape).deepCopy( points );
 				
 				this.dragged = newShape;
 				
@@ -181,23 +237,33 @@ final class MyCanvas extends Pane {
 				this.getChildren().add(newShape);
 				shape.setVisible(false);
 				this.shape = newShape;
-				
 			}
 		});
-	
-		
+
 		shape.setOnMouseReleased(releaseEvt->{
-			System.out.println("release on rect");
+			//System.out.println("release on rect");
+			
 			if ( !MyCanvas.isChosedShape ) {
 				return;
 			}
 			
+			 
 			
 			if ( this.dragged != null) {
-				this.dragged.setEffect(null);	
+				this.dragged.setEffect(null);
+				this.getChildren().remove(this.chosedShape);
+			}else {
+				this.chosedShape.setEffect(null);
+				//this.allChosedShapes.remove(this.chosedShape);
 				
 			}
-			this.getChildren().remove(this.chosedShape);
+			
+			if ( this.allChosedShapes.contains(this.chosedShape) && this.chosedShape.getEffect() == null) {
+				this.allChosedShapes.remove(this.chosedShape);
+			}
+			
+			if (this.getChildren().contains(this.chosedShape))
+				System.out.println("Yes");
 			MyCanvas.clickedTimes = 0;
 			MyCanvas.isChosedShape = false;
 			this.dragged = null;
@@ -267,12 +333,8 @@ final class MyCanvas extends Pane {
 		
 	}
 	
-	
-	
-	
-	private void drawRectangle() {
-		
+	public ArrayList<Shape> getAllChosedShape(){
+		return this.allChosedShapes;
 	}
-	
 	
 }

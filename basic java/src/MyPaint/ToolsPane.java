@@ -1,10 +1,13 @@
 package MyPaint;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.DropShadow;
@@ -12,8 +15,14 @@ import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
+
+import java.util.ArrayList;
+
+
 
 import MyPaint.ButtonStyle;;
 
@@ -34,7 +43,7 @@ import MyPaint.ButtonStyle;;
  *			创建Accordion控件 C，获得C的面板列表，向其中添加标题面板
  */
 
-class ToolsPane extends HBox{
+class ToolsPane extends VBox{
 	//各个选项的图标的路径以及图标的名字
 	private static String iconRootPath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/";
 	private static String[] brushIconPath = new String[] {iconRootPath+"pencil_16px.png", iconRootPath+"brush_16px.png"};
@@ -53,15 +62,21 @@ class ToolsPane extends HBox{
 	private static String selectedLineType = "";
 	private static String selectedShape = "长方形";
 	private static Color selectedColor = null;
+	private static String selectedFontFamily = "Microsoft YaHei";
+	private static int selectedFontSize = 15;
 	
 	private Accordion brush;
 	private Accordion shape;
 	private Accordion lineType;
 	private ColorPicker color;
+	private ComboBox fontFamilySelector;
+	private ComboBox fontSizeSelector;
 	private boolean showColor = false;
 	
 	public ToolsPane(Stage stage) {
 		super(5);
+		HBox subPaneTop = new HBox();
+		HBox subPaneMid = new HBox();
 		this.setEffect(new DropShadow());
 		this.setStyle("-fx-background-color:rgba(225,225,225)");
 		this.prefWidthProperty().bind(stage.widthProperty());
@@ -69,6 +84,15 @@ class ToolsPane extends HBox{
 		this.setMinHeight(40);
 		this.setViewOrder(3);
 		this.createTools();
+		subPaneTop.getChildren().add(this.shape);
+		subPaneTop.getChildren().add(this.lineType);
+		subPaneTop.getChildren().add(this.color);
+		subPaneTop.getChildren().add(this.createTextBox("文本"));
+		//subPaneMid.getChildren().add(this.fontFamilySelector);
+		//subPaneMid.getChildren().add(this.fontSizeSelector);
+		//this.getChildren().add(this.createTextBox("文本"));
+		this.getChildren().add(subPaneTop);
+		/*
 		//添加画笔选择框
 		this.getChildren().add(this.brush);
 		//添加形状选择框
@@ -77,6 +101,13 @@ class ToolsPane extends HBox{
 		this.getChildren().add(this.lineType);
 		//添加颜色选择器
 		this.getChildren().add(this.color);
+		//添加字体选择器
+		this.getChildren().add(this.fontFamilySelector);
+		//添加文字大小选择器
+		this.getChildren().add(this.fontSizeSelector);*/
+		//添加是前景颜色标签
+		
+		//添加背景颜色标签
 		
 	}
 	
@@ -93,6 +124,64 @@ class ToolsPane extends HBox{
 			System.out.println("chosed color "+this.selectedColor);
 		});
 		
+		this.fontFamilySelector = this.createFontFamilySelector();
+		this.fontSizeSelector = this.createFontSizeSelector();
+	}
+	
+	public ComboBox createFontFamilySelector() {
+		ComboBox cb = new ComboBox();
+		ObservableList<String> fontFamilies = FXCollections.observableList(Font.getFamilies());
+		cb.setItems(fontFamilies);
+		cb.setOnAction(e->{
+			this.selectedFontFamily = (String) cb.getSelectionModel().getSelectedItem();
+			System.out.println("font:"+this.selectedFontFamily);
+		});
+		cb.prefWidthProperty().bind(this.widthProperty().divide(10));
+		cb.setTooltip(new Tooltip("字体"));
+		cb.setValue(this.selectedFontFamily);
+		return cb;
+	}
+	
+	public ComboBox createFontSizeSelector() {
+		ComboBox cb = new ComboBox();
+		ArrayList<Integer> fontSizeList = new ArrayList<Integer>();
+		for (int i = 8; i < 72; i += 4) {
+			fontSizeList.add(i);
+		}
+		ObservableList<Integer> fontSize = FXCollections.observableList(fontSizeList);
+		cb.setItems(fontSize);
+		cb.setOnAction(e->{
+			this.selectedFontSize = (Integer) cb.getSelectionModel().getSelectedItem();
+			System.out.println("font:"+this.selectedFontSize);
+		});
+		cb.prefWidthProperty().bind(this.widthProperty().divide(10));
+		cb.setTooltip(new Tooltip("字体大小"));
+		cb.setValue(this.selectedFontSize);
+		return cb;
+	}
+	
+	public Accordion createTextBox(String tip) {
+		GridPane grid = new GridPane();
+		grid.add(this.fontFamilySelector, 0, 0);
+		grid.add(this.fontSizeSelector, 1, 0);
+		
+		TitledPane tp = new TitledPane();
+		tp.setContent(grid);
+		
+		Accordion ac = new Accordion();
+		ac.getPanes().addAll(tp);
+		
+		
+		//设置各个控件的属性
+		tp.setCollapsible(true);
+		tp.prefWidthProperty().bind(this.widthProperty().divide(4.5));
+		tp.prefHeightProperty().bind(grid.widthProperty());
+		tp.setText(tip);
+		tp.setTooltip(new Tooltip(tip));
+		
+		//this.bindEvents(btns, tp, iconPath);
+		
+		return ac;
 	}
 	
 	//设置各个功能的下拉框
@@ -222,6 +311,14 @@ class ToolsPane extends HBox{
 
 	public Color getSelectedColor() {
 		return this.color.getValue();
+	}
+	
+	public String getSelectedFontFamily() {
+		return this.selectedFontFamily;
+	}
+	
+	public int getSelectedFontSize() {
+		return this.selectedFontSize;
 	}
 	
 	@SuppressWarnings("deprecation")

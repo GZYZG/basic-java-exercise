@@ -8,6 +8,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
@@ -15,12 +16,19 @@ import javafx.scene.text.Text;
 
 interface Copy{
 	public Shape deepCopy(double x, double y);
+	public Shape deepCopy(double... points);
 	public double getPosX();
 	public double getPosY();
+	public double[] getPos();
 	public String getID();
 }
 
 class MyRectangle extends Rectangle implements Serializable, Copy{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8577986604588650981L;
+
 	protected Date createDate;
 	
 	protected double[] pos;
@@ -50,9 +58,7 @@ class MyRectangle extends Rectangle implements Serializable, Copy{
 		this(x,y,width,height,lineWidth,lineColor);
 		this.setFill(fillColor);
 	}
-	
-	
-	
+
 	public double[] getPos() {
 		return this.pos;
 	}
@@ -86,10 +92,20 @@ class MyRectangle extends Rectangle implements Serializable, Copy{
 
 		return newRect;
 	}
-
+	@Override
+	public Shape deepCopy(double... points) {
+		// TODO Auto-generated method stub
+		return this.deepCopy(points[0], points[1]);
+	}
+	
 }
 
 class MySquare extends MyRectangle {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3555599912704077113L;
+
 	public MySquare() {
 		
 	}
@@ -113,6 +129,10 @@ class MySquare extends MyRectangle {
 
 class MyCircle extends Circle implements Serializable, Copy{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5105246695834814882L;
 	private double[] pos;
 	private Date createDate;
 	
@@ -126,13 +146,7 @@ class MyCircle extends Circle implements Serializable, Copy{
 		
 	}
 
-	@Override
-	public Shape deepCopy(double x, double y) {
-		// TODO Auto-generated method stub
-		MyCircle newCircle = new MyCircle(x, y, this.getRadius(),
-				this.getStrokeWidth(), this.getStroke(), this.getFill());
-		return newCircle;
-	}
+	
 
 	@Override
 	public double getPosX() {
@@ -151,10 +165,36 @@ class MyCircle extends Circle implements Serializable, Copy{
 		// TODO Auto-generated method stub
 		return "MyCircle@"+this.createDate.getTime();
 	}
+
+	@Override
+	public Shape deepCopy(double x, double y) {
+		// TODO Auto-generated method stub
+		MyCircle newCircle = new MyCircle(x, y, this.getRadius(),
+				this.getStrokeWidth(), this.getStroke(), this.getFill());
+		return newCircle;
+	}
+	
+	@Override
+	public Shape deepCopy(double... points) {
+		// TODO Auto-generated method stub
+		return this.deepCopy(points[0], points[1]);
+	}
+
+
+
+	@Override
+	public double[] getPos() {
+		// TODO Auto-generated method stub
+		return this.pos;
+	}
 	
 }
 
 class MyText extends Text implements Serializable, Copy{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7436172851065445687L;
 	private double[] pos;
 	private Date createDate;
 	
@@ -166,15 +206,10 @@ class MyText extends Text implements Serializable, Copy{
 		this.pos = new double[] {x,y};
 		this.createDate = new Date();
 		this.setFont(font);
+		//System.out.println(Font.getFamilies());
 	}
 
-	@Override
-	public Shape deepCopy(double x, double y) {
-		// TODO Auto-generated method stub
-		MyText newText = new MyText(x, y, this.getText(), this.getFont(), this.getStrokeWidth(), this.getStroke(), 
-				this.getFill());
-		return newText;
-	}
+	
 
 	@Override
 	public double getPosX() {
@@ -194,4 +229,88 @@ class MyText extends Text implements Serializable, Copy{
 		return "MyText@"+this.createDate.getTime();
 	}
 	
+	@Override
+	public Shape deepCopy(double x, double y) {
+		// TODO Auto-generated method stub
+		MyText newText = new MyText(x, y, this.getText(), this.getFont(), this.getStrokeWidth(), this.getStroke(), 
+				this.getFill());
+		return newText;
+	}
+
+	@Override
+	public Shape deepCopy(double... points) {
+		// TODO Auto-generated method stub
+		return this.deepCopy(points[0], points[1]);
+	}
+
+
+
+	@Override
+	public double[] getPos() {
+		// TODO Auto-generated method stub
+		return this.pos;
+	}
+	
+}
+
+
+class MyPolygon extends Polygon implements Serializable ,Copy{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3713518895459604096L;
+	private static Date createDate;
+	private static double[] pos;
+	public MyPolygon(double lineWidth, Paint lineColor, Paint fillColor, double...points) {
+		super(points);
+		this.pos = new double[this.getPoints().size()];
+		for(int i = 0; i < points.length; i++) {
+			this.pos[i] = this.getPoints().get(i);
+		}
+		this.createDate = new Date();
+		this.setStrokeWidth(lineWidth);
+		this.setStroke(lineColor);
+		this.setFill(fillColor);
+	}
+	
+	@Override
+	public double[] getPos() {
+		double[] points = new double[this.getPoints().size()];
+		for(int i = 0; i < points.length; i++) {
+			points[i] = this.getPoints().get(i);
+		}
+		return points;
+	}
+	
+	@Override
+	public Shape deepCopy(double x, double y) {
+		// TODO Auto-generated method stub
+		//MyPolygon newPolygon = new MyPolygon
+		return null;
+	}
+	
+	@Override
+	public Shape deepCopy(double ...points) {
+		// TODO Auto-generated method stub
+		MyPolygon newPolygon = new MyPolygon( this.getStrokeWidth(), this.getStroke(), this.getFill(), points);
+		return newPolygon;
+	}
+
+	@Override
+	public double getPosX() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double getPosY() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public String getID() {
+		// TODO Auto-generated method stub
+		return "MyPolygon@"+this.createDate.getTime();
+	}
 }
