@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import javafx.scene.control.Button;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Shape;
 
 final class winattr{
@@ -45,19 +46,23 @@ final class ButtonStyle{
 final class WRObject2File{
 	
 	public static ArrayList<Shape> readFromFile(String filePath) {
-		System.out.println("in readShape!");
+		System.out.println("readShape...");
 		FileInputStream infile;
 		ArrayList<Shape> objList = new ArrayList<>();
 		try {
-			int count = 1;
 			infile = new FileInputStream(filePath);
 			ObjectInputStream objReader = new ObjectInputStream(infile);
-			Shape obj;
+			Copy obj;
 			while(true) {
 				try {
-					obj = (Shape) objReader.readObject();
-					count++;
-					objList.add(obj);
+					obj = (Copy) objReader.readObject();
+					System.out.println("Shape:"+(obj).toString());
+					
+					try {
+						objList.add(obj.reply());
+					} catch (ClassCastException e) {
+						System.out.println(e.getMessage());
+					}
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

@@ -5,8 +5,10 @@ package MyPaint;
 
 import java.util.ArrayList;
 
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.InnerShadow;
@@ -35,6 +37,7 @@ final class MyCanvas extends Pane {
 	private static Shape chosedShape = null;
 	private static winattr attr = new winattr();
 	private static ArrayList<Shape> allChosedShapes;
+	private static TextArea canvasInfo = null;
 	
 	public MyCanvas(Stage stage, ToolsPane tool) {
 		super();
@@ -48,6 +51,12 @@ final class MyCanvas extends Pane {
 		this.setCursor(Cursor.cursor("CROSSHAIR"));
 		this.bindEvents4Canvas();
 		this.allChosedShapes = new ArrayList<>();
+		
+		this.createCanvasInfoLabel(stage);
+		
+		this.setOnKeyPressed(e->{
+			System.out.println("deling");
+		});
 	}
 	
 	public MyCanvas(Stage stage, double width, double height) {
@@ -61,17 +70,24 @@ final class MyCanvas extends Pane {
 	@SuppressWarnings("static-access")
 	public void bindEvents4Canvas() {
 		
+		this.setOnMouseMoved(moveEvt->{
+			this.canvasInfo.setText("x:"+(int)moveEvt.getX()+", y:"+(int)moveEvt.getY());
+			for ( Shape s:this.allChosedShapes) {
+				this.canvasInfo.setText(this.canvasInfo.getText()+"\n"+s.toString());
+			}
+		});
+		
 		this.setOnMousePressed(pe->{
 			this.startPaint = true;
-			System.out.println("start");
+			//System.out.println("start");
 			this.x = pe.getX();
 			this.y = pe.getY();
-			if (this.startPaint && !this.isChosedShape && this.tool.getSelectedShape().equals("文本") && this.clickedTimes == 0) {
+			if (this.startPaint /*&& !this.isChosedShape*/ && this.tool.getSelectedShape().equals("文本") && this.clickedTimes == 0) {
 				if (this.input != null) {
 					
 					Shape shapeObj = new MyText(input.getTranslateX(), input.getTranslateY()+input.getHeight(), 
 							input.getText(), new Font(this.tool.getSelectedFontFamily(), this.tool.getSelectedFontSize()), 
-							this.tool.getSelectedLineType(), this.tool.getSelectedColor(), null);
+							this.tool.getSelectedLineType(), this.tool.getSelectedForeColor(), this.tool.getSelectedBackColor());
 					this.getChildren().remove(this.input);
 					this.getChildren().add(shapeObj);
 					this.bindEvents4Shape(shapeObj);
@@ -85,12 +101,7 @@ final class MyCanvas extends Pane {
 					this.getChildren().add(this.input);
 				}
 
-			}/*
-			if (!this.startPaint) {
-				if( this.input != null) {
-					this.getChildren().remove(this.input);
-				}
-			}*/
+			}
 			
 		});
 		
@@ -108,7 +119,7 @@ final class MyCanvas extends Pane {
 				
 				
 				double lineWidth = this.tool.getSelectedLineType();
-				Color lineColor = this.tool.getSelectedColor();
+				Color lineColor = this.tool.getSelectedForeColor();
 				String brush = this.tool.getSelectedBrush();
 				Shape shapeObj = null;
 				
@@ -119,34 +130,49 @@ final class MyCanvas extends Pane {
 					
 					shapeObj = new MyRectangle(startX, startY,
 							Math.abs(mouseDraggedEvt.getX()-this.x), Math.abs(mouseDraggedEvt.getY()-this.y),
-							lineWidth, lineColor, null);
+							lineWidth, lineColor, this.tool.getSelectedBackColor());
 				}
 				if ( shapeType.equals("正方形")) {
 					//画正方形
 					
 					shapeObj = new MySquare(startX, startY,
 							Math.max(Math.abs(mouseDraggedEvt.getX()-this.x), Math.abs(mouseDraggedEvt.getY()-this.y)),
-							lineWidth, lineColor, null);
+							lineWidth, lineColor, this.tool.getSelectedBackColor());
 				}
 				if ( shapeType.equals("圆形")) {
 					//画圆形
 					shapeObj = new MyCircle(this.x, this.y, 
 							Math.max(Math.abs(mouseDraggedEvt.getX()-this.x), Math.abs(mouseDraggedEvt.getY()-this.y)),
-							lineWidth, lineColor, null);	
+							lineWidth, lineColor, this.tool.getSelectedBackColor());	
 					
 				}
 				if ( shapeType.equals("三角形")) {
 					//画三角形
-					shapeObj = new MyPolygon(lineWidth, lineColor, null, 
+					shapeObj = new MyPolygon(lineWidth, lineColor, this.tool.getSelectedBackColor(), 
 							this.x, this.y, 
 							mouseDraggedEvt.getX(), mouseDraggedEvt.getY(),
 							2*this.x-mouseDraggedEvt.getX(), mouseDraggedEvt.getY());
+				}
+				if ( shapeType.equals("椭圆")) {
+					//画椭圆
+					shapeObj = new MyEllipse(this.x, this.y, 
+							Math.abs(mouseDraggedEvt.getX()-this.x), Math.abs(mouseDraggedEvt.getY()-this.y),
+							lineWidth, lineColor, this.tool.getSelectedBackColor());	
+					
+				}
+				if ( shapeType.equals("直线")) {
+					//画椭圆
+					shapeObj = new MyStraitLine(this.x, this.y,mouseDraggedEvt.getX(), mouseDraggedEvt.getY(),
+							lineWidth, lineColor, this.tool.getSelectedBackColor());	
+					
 				}
 				
 				if ( shapeObj != null) {
 					this.getChildren().add(shapeObj);
 					this.shape = shapeObj;
 				}
+				
+				
 					
 				
 			}
@@ -168,7 +194,7 @@ final class MyCanvas extends Pane {
 			Node tmp = this.getChildren().get(this.getChildren().size()-1);
 			this.bindEvents4Shape(tmp);
 		
-			System.out.println("released");
+			//System.out.println("released");
 			this.shape = null;
 			
 		});
@@ -177,6 +203,7 @@ final class MyCanvas extends Pane {
 	public void bindEvents4Shape(Node shape) {
 		
 		shape.setOnMousePressed(clickEvt->{
+			
 			if (this.chosedShape != shape) {
 				this.clickedTimes = 0;
 			}
@@ -202,7 +229,7 @@ final class MyCanvas extends Pane {
 				MyCanvas.isChosedShape = true;
 				
 				
-				//this.chosedShape = (Shape)shape;
+				this.chosedShape = (Shape)shape;
 				return;
 			}	
 			if ( this.input != null) {
@@ -252,6 +279,7 @@ final class MyCanvas extends Pane {
 			if ( this.dragged != null) {
 				this.dragged.setEffect(null);
 				this.getChildren().remove(this.chosedShape);
+				this.allChosedShapes.remove(this.chosedShape);
 			}else {
 				this.chosedShape.setEffect(null);
 				//this.allChosedShapes.remove(this.chosedShape);
@@ -309,12 +337,12 @@ final class MyCanvas extends Pane {
 		
 		Shape shapeObj = null;
 		int lineWidth = this.tool.getSelectedLineType();
-		Color lineColor = this.tool.getSelectedColor();
+		Color lineColor = this.tool.getSelectedForeColor();
 		String brush = this.tool.getSelectedBrush();
 		
 		if ( shape.equals("长方形") ) {
 			//画长方形
-			shapeObj = new MyRectangle();
+			//shapeObj = new MyRectangle();
 		}
 		if ( shape.equals("正方形")) {
 			
@@ -335,6 +363,43 @@ final class MyCanvas extends Pane {
 	
 	public ArrayList<Shape> getAllChosedShape(){
 		return this.allChosedShapes;
+	}
+	
+	
+	
+	public void createCanvasInfoLabel(Stage stage) {
+		this.canvasInfo = new TextArea();
+		this.canvasInfo.setText("info");
+		this.canvasInfo.prefWidthProperty().bind(stage.widthProperty());
+		this.canvasInfo.prefHeightProperty().bind(stage.heightProperty().divide(10));
+		this.canvasInfo.setStyle("-fx-background:rgb(100,100,180)");
+		
+		this.canvasInfo.setWrapText(true);
+		this.canvasInfo.setEditable(false);
+		
+	}
+	
+	public TextArea getCanvasInfoLabel() {
+		return this.canvasInfo;
+	}
+	
+	public void addShapes(ArrayList<Shape> shapes) {
+		
+		for ( Shape s:shapes) {
+			
+			this.getChildren().add(s);
+			this.bindEvents4Shape(s);
+		}
+	}
+	
+	public void deleteChosedShapes() {
+		System.out.println("del");
+		for ( Shape s:this.allChosedShapes) {
+			System.out.println("deling");
+			this.getChildren().remove(s);
+			
+		}
+		this.allChosedShapes.clear();
 	}
 	
 }

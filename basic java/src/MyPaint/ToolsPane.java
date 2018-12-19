@@ -6,8 +6,10 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.DropShadow;
@@ -49,15 +51,17 @@ class ToolsPane extends VBox{
 	private static String[] brushIconPath = new String[] {iconRootPath+"pencil_16px.png", iconRootPath+"brush_16px.png"};
 	private static String[] brushLabels = new String[] {"铅笔", "刷子"};
 	private static String[] shapeIconPath = 
-			new String[] {iconRootPath + "rectangle_16px.png", iconRootPath + "square_16px.png",
-					iconRootPath + "circle_16px.png", iconRootPath + "triangle_16px.png", 
-					iconRootPath + "text_16px.png"};
-	private static String[] shapeLabels = new String[] {"长方形", "正方形", "圆形", "三角形", "文本"};
+			new String[] {iconRootPath + "randomline_16px.png", iconRootPath + "straitline_16px.png", iconRootPath + "rectangle_16px.png", iconRootPath + "square_16px.png",
+					iconRootPath + "circle_16px.png" , iconRootPath + "ellipse_16px.png", 
+					iconRootPath + "triangle_16px.png", iconRootPath + "text_16px.png"};
+	private static String[] shapeLabels = new String[] {"任意线", "直线", "长方形", "正方形", "圆形", "椭圆", "三角形", "文本"};
 	private static String[] lineTypeLabels = new String[] {"1px", "3px", "5px", "8px", "10px", "13px", "16px"};
 	private static String[] lineTypeIconPath = new String[] {iconRootPath + "line_1px.png", iconRootPath + "line_3px.png",
 					iconRootPath + "line_5px.png", iconRootPath + "line_8px.png",
 					iconRootPath + "line_10px.png", iconRootPath + "line_13px.png", iconRootPath + "line_16px.png"};
 	
+	protected static boolean hasStroke = false;
+	protected static boolean isFilled = false;
 	private static String selectedBrush = "";
 	private static String selectedLineType = "";
 	private static String selectedShape = "长方形";
@@ -68,6 +72,10 @@ class ToolsPane extends VBox{
 	private Accordion brush;
 	private Accordion shape;
 	private Accordion lineType;
+	private Accordion shapeAttrSelector;
+	protected Button foreGroundColorSelector;
+	protected Button backGroundColorSelector;
+	protected Button foreBackColorSelector;
 	private ColorPicker color;
 	private ComboBox fontFamilySelector;
 	private ComboBox fontSizeSelector;
@@ -86,25 +94,16 @@ class ToolsPane extends VBox{
 		this.createTools();
 		subPaneTop.getChildren().add(this.shape);
 		subPaneTop.getChildren().add(this.lineType);
+		subPaneTop.getChildren().add(this.foreGroundColorSelector);
+		subPaneTop.getChildren().add(this.backGroundColorSelector);
 		subPaneTop.getChildren().add(this.color);
 		subPaneTop.getChildren().add(this.createTextBox("文本"));
-		//subPaneMid.getChildren().add(this.fontFamilySelector);
+		
+		subPaneTop.getChildren().add(this.shapeAttrSelector);
 		//subPaneMid.getChildren().add(this.fontSizeSelector);
 		//this.getChildren().add(this.createTextBox("文本"));
 		this.getChildren().add(subPaneTop);
-		/*
-		//添加画笔选择框
-		this.getChildren().add(this.brush);
-		//添加形状选择框
-		this.getChildren().add(this.shape);
-		//添加线条粗细选择框
-		this.getChildren().add(this.lineType);
-		//添加颜色选择器
-		this.getChildren().add(this.color);
-		//添加字体选择器
-		this.getChildren().add(this.fontFamilySelector);
-		//添加文字大小选择器
-		this.getChildren().add(this.fontSizeSelector);*/
+		
 		//添加是前景颜色标签
 		
 		//添加背景颜色标签
@@ -122,10 +121,39 @@ class ToolsPane extends VBox{
 		this.color.valueProperty().addListener(e->{
 			this.selectedColor = this.color.getValue();
 			System.out.println("chosed color "+this.selectedColor);
+			if ( this.foreBackColorSelector != null) {
+				this.foreBackColorSelector.setStyle("-fx-background-color:#"+this.selectedColor.toString().substring(2) );
+				this.foreBackColorSelector.setTooltip(
+						new Tooltip(this.foreBackColorSelector.getText()+":#"+
+								this.selectedColor.toString().substring(2)) );
+			}
 		});
 		
 		this.fontFamilySelector = this.createFontFamilySelector();
 		this.fontSizeSelector = this.createFontSizeSelector();
+		
+		this.foreGroundColorSelector = new Button("前景色");
+		this.backGroundColorSelector = new Button("背景色");
+		this.foreGroundColorSelector.setStyle("-fx-background-color:#000000");
+		this.backGroundColorSelector.setStyle("-fx-background-color:#000000");
+		this.foreGroundColorSelector.setTooltip(new Tooltip("前景色"+
+				this.foreGroundColorSelector.getStyle().substring("-fx-background-color:".length()-1) ) );
+		this.backGroundColorSelector.setTooltip(new Tooltip("背景色" + 
+				this.backGroundColorSelector.getStyle().substring("-fx-background-color:".length()-1) ) );
+		
+		this.foreGroundColorSelector.prefWidthProperty().bind(this.widthProperty().divide(15));
+		this.backGroundColorSelector.prefWidthProperty().bind(this.widthProperty().divide(15));
+		
+		this.foreGroundColorSelector.setOnAction(e->{
+			this.foreBackColorSelector = this.foreGroundColorSelector;
+		});
+
+		this.backGroundColorSelector.setOnAction(e->{
+			this.foreBackColorSelector = this.backGroundColorSelector;
+		});
+		
+		//this.shapeAttrSelector = this.createShapeAttrSelector("形状属性", 3);
+		this.shapeAttrSelector = this.createBox(null, new String[] {"边框", "填充"}, "形状属性", 3);
 	}
 	
 	public ComboBox createFontFamilySelector() {
@@ -193,9 +221,13 @@ class ToolsPane extends VBox{
 	创建Accordion控件 C，获得C的面板列表，向其中添加标题面板
 	设置各个控件的属性*/
 	public Accordion createBox(String[] iconPath, String[] labels, String tip, int col_num) {
-		ImageView[] icons = this.createIcons(iconPath);
+		ImageView[] icons = null;
+		if ( iconPath != null) {
+			icons = this.createIcons(iconPath);
+		}
+			
 		GridPane grid = new GridPane();
-		Button[] btns = this.addNodes2GridPane(grid, icons, labels, col_num);
+		Node[] btns =  this.addNodes2GridPane(grid, icons, labels, col_num);
 		
 		TitledPane tp = new TitledPane();
 		tp.setContent(grid);
@@ -206,7 +238,7 @@ class ToolsPane extends VBox{
 		
 		//设置各个控件的属性
 		tp.setCollapsible(true);
-		tp.prefWidthProperty().bind(this.widthProperty().divide(4.5));
+		tp.prefWidthProperty().bind(this.widthProperty().divide(6.5));
 		tp.prefHeightProperty().bind(grid.widthProperty());
 		tp.setText(tip);
 		tp.setTooltip(new Tooltip(tip));
@@ -215,37 +247,51 @@ class ToolsPane extends VBox{
 		
 		return ac;
 	}
-	
-	
+
 	//设置各个工具选项被选中的事件
 	public void bindEvents(Node[] nodes, TitledPane tp, String[] iconPath) {
+		//ImageView iv = null;
 		for(int i = 0; i < nodes.length; i++) {
-			Button tmp = (Button)nodes[i];
-			
+			if (nodes[i] instanceof Button) {
+				Button tmp = (Button)nodes[i];
 			//必须重新创建一个imageview对象，否则要是使用按钮所使用的imageview来设置的话，则原来按钮的graphics则失效了
-			ImageView iv = new ImageView(iconPath[i]);
-			((Button)nodes[i]).setOnAction(evt->{
-				tp.setText(tmp.getText());
-				//选择后就将相应的面板折叠起来
-				tp.setExpanded(false);
-				
-				tp.setGraphic(iv);
-				System.out.println("chosed  " + tmp.getText());
-				
-				if(tp.getTooltip().getText().equals("画笔")) {
-					this.selectedBrush = tmp.getText();
+			
+				 ImageView iv = new ImageView(iconPath[i]);
+				((Button)nodes[i]).setOnAction(evt->{
+					tp.setText(tmp.getText());
+					//选择后就将相应的面板折叠起来
+					tp.setExpanded(false);
 					
-				}
-				if(tp.getTooltip().getText().equals("形状")) {
-					this.selectedShape = tmp.getText();
+					tp.setGraphic(iv);
+					System.out.println("chosed  " + tmp.getText());
 					
-				}
-				if(tp.getTooltip().getText().equals("线条粗细")) {
-					this.selectedLineType = tmp.getText();
+					if(tp.getTooltip().getText().equals("画笔")) {
+						this.selectedBrush = tmp.getText();
+						
+					}
+					if(tp.getTooltip().getText().equals("形状")) {
+						this.selectedShape = tmp.getText();
+						
+					}
+					if(tp.getTooltip().getText().equals("线条粗细")) {
+						this.selectedLineType = tmp.getText();
+						
+					}
 					
-				}
+				});
+			}
+			if ( nodes[i] instanceof CheckBox) {
+				CheckBox tmp = (CheckBox)nodes[i];
+				tmp.setOnAction(e->{
+					if ( tmp.getText().equals("边框")) {
+						this.hasStroke = (this.hasStroke?false:true);
+					}
+					if ( tmp.getText().equals("填充")) {
+						this.isFilled = (this.isFilled?false:true);
+					}
+				});
 				
-			});
+			}
 			
 		}
 		
@@ -268,26 +314,32 @@ class ToolsPane extends VBox{
 	
 	//在网格面板中添加图标
 	@SuppressWarnings("static-access")
-	public Button[] addNodes2GridPane(GridPane grid, Node[] nodes, String[] labels, int col_num) {
-		//System.out.print(""+nodes.length);
-		Button[] btns = new Button[nodes.length];
-		Button tmp;
-		for(int i = 0; i < nodes.length; i++) {
-			
-			if( !(nodes[i] instanceof Button)) {
-				tmp = new Button(labels[i], nodes[i]);
-				
-			}else {
-				tmp = (Button)nodes[i];
-				tmp.setText(labels[i]);
+	public Node[] addNodes2GridPane(GridPane grid, Node[] nodes, String[] labels, int col_num) {
+		Node[] btns = null;
+		if (nodes != null && nodes[0] instanceof ImageView)
+			btns = new Button[nodes.length];
+		if (nodes == null || nodes[0] instanceof CheckBox)
+			btns = new CheckBox[labels.length];
+		for(int i = 0; i < labels.length; i++) {
+			if ( nodes == null) {
+				CheckBox tmp = new CheckBox(labels[i]);
+				tmp.prefWidthProperty().bind(grid.widthProperty().divide(col_num+0.2));
+				tmp.prefHeightProperty().bind(grid.heightProperty().divide(labels.length/col_num+0.4));
+				tmp.setTooltip(new Tooltip(labels[i]));
+				btns[i] = tmp;
 			}
-			btns[i] = tmp;
-			tmp.prefWidthProperty().bind(grid.widthProperty().divide(col_num+0.2));
-			tmp.prefHeightProperty().bind(grid.heightProperty().divide(nodes.length/col_num+0.4));
-			ButtonStyle.setButtonStyle(tmp);
-			tmp.setTooltip(new Tooltip(labels[i]));
-			grid.add(tmp, i % col_num, i / col_num);
-			grid.setMargin(tmp, new Insets(2,3,2,2));
+			else if( nodes[i] instanceof ImageView ) {
+				Button tmp = new Button(labels[i], nodes[i]);
+				ButtonStyle.setButtonStyle(tmp);
+				tmp.prefWidthProperty().bind(grid.widthProperty().divide(col_num+0.2));
+				tmp.prefHeightProperty().bind(grid.heightProperty().divide(nodes.length/col_num+0.4));
+				tmp.setTooltip(new Tooltip(labels[i]));
+				btns[i] = tmp;
+			}
+			
+
+			grid.add(btns[i], i % col_num, i / col_num);
+			grid.setMargin(btns[i], new Insets(2,3,2,2));
 		}
 		
 		return btns;
@@ -302,27 +354,43 @@ class ToolsPane extends VBox{
 	}
 	
 	public int getSelectedLineType() {
-		if (ToolsPane.selectedLineType.equals("")) {
+		if ( this.hasStroke) {
 			//默认线宽为3px
-			return 3;
+			if (ToolsPane.selectedLineType.equals(""))
+				return 3;
+			return Integer.valueOf(ToolsPane.selectedLineType.substring(0, ToolsPane.selectedLineType.indexOf("px")));
 		}
-		return Integer.valueOf(ToolsPane.selectedLineType.substring(0, ToolsPane.selectedLineType.indexOf("px")));
+		else
+			return 0;
+
+		
 	}
 
-	public Color getSelectedColor() {
-		return this.color.getValue();
+	public Color getSelectedForeColor() {
+		if ( this.color.getValue() == null)
+			return Color.BLACK;
+		return Color.valueOf("0x"+this.foreGroundColorSelector.getTooltip().getText().substring(5));
+	}
+	
+	public Color getSelectedBackColor() {
+		//System.out.println("0x"+this.backGroundColorSelector.getTooltip().getText().substring(5));
+		if ( !this.isFilled )
+			return null;
+		return Color.valueOf("0x"+this.backGroundColorSelector.getTooltip().getText().substring(5));
+		
 	}
 	
 	public String getSelectedFontFamily() {
 		return this.selectedFontFamily;
 	}
 	
+	public Integer lineTypeProperty() {
+		return this.getSelectedLineType();
+	}
+
 	public int getSelectedFontSize() {
 		return this.selectedFontSize;
 	}
 	
-	@SuppressWarnings("deprecation")
-	public Integer lineTypeProperty() {
-		return new Integer(this.getSelectedLineType());
-	}
+	
 }

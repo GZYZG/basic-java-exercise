@@ -5,9 +5,11 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
 import javafx.scene.effect.Blend;
 import javafx.scene.effect.Bloom;
 import javafx.scene.effect.BoxBlur;
@@ -23,6 +25,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
@@ -68,9 +71,18 @@ public class test extends Application{
 		mainPane.setMargin(toolsBar, new Insets(5,5,5,5));
 		
 		canvas = this.createMyCanvas(stage, toolsBar);
-
 		mainPane.getChildren().add(canvas);
-		mainPane.setMargin(canvas, new Insets(5,5,5,5));
+		mainPane.setMargin(canvas, new Insets(5,5,1,5));
+		
+		TextArea info = this.canvas.getCanvasInfoLabel();
+		mainPane.getChildren().add(info);
+		mainPane.setMargin(info, new Insets(1,5,5,5));
+		
+		
+		mainPane.setOnKeyPressed(e->{
+			//this.canvas.deleteChosedShapes();
+			System.out.println("del ok");
+		});
 		
 		stage.setAlwaysOnTop(true);
 		stage.show();
@@ -101,8 +113,9 @@ public class test extends Application{
 		iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/savefile_16px.png";
 		saveFileItem.setGraphic(new ImageView(iconpath));
 		saveFileItem.setOnAction(save->{
-			System.out.println(canvas.getAllChosedShape());
+			//System.out.println(canvas.getAllChosedShape());
 			this.allShapeChosed = this.canvas.getAllChosedShape();
+			System.out.println("Chosed size:"+this.canvas.getAllChosedShape().size());
 			this.saveShape(stage);
 		});
 		
@@ -150,6 +163,8 @@ public class test extends Application{
 		stage.setMinHeight(winattr.winMinHeight);
 		stage.setMinWidth(winattr.winMinWidth);	
 		stage.initStyle(StageStyle.DECORATED);
+		
+		
 	}
 		
 	//设置主面板
@@ -158,11 +173,17 @@ public class test extends Application{
 		main_pane.prefHeightProperty().bind(stage.heightProperty());
 		main_pane.prefWidthProperty().bind(stage.widthProperty());
 		main_pane.setStyle("-fx-background-color: rgba(230,230,230);" );
+		main_pane.setOnKeyPressed(e->{
+			this.canvas.deleteChosedShapes();
+			System.out.println("del ok");
+		});
 	}
 	
 	//点击形状时，弹出文件选择器，并进行文件保存
 	@SuppressWarnings("deprecation")
 	public void saveShape(Stage stage) {
+		if (this.canvas.getAllChosedShape().size() == 0)
+			return;
 		FileChooser filePicker = new FileChooser();
 		filePicker.setTitle("保存形状");
 		filePicker.getExtensionFilters().add(new ExtensionFilter("Shape", "*.s","*.shape","*.SHAPE","*.Shape"));
@@ -192,15 +213,11 @@ public class test extends Application{
 		//f = filePicker.showSaveDialog(stage);
 		f = filePicker.showOpenDialog(stage);
 		if ( f == null) {
-			//默认保存在项目的根目录下
 			return;
 		}
 		ArrayList<Shape> shapes = WRObject2File.readFromFile(f.getPath());
-		for (Shape s:shapes) {
-			this.canvas.getChildren().add(s);
-			System.out.println(s+"");
-		}
-
+		this.canvas.addShapes(shapes);
+		
 		System.out.println("read path:"+f.getPath());
 	}
 	
