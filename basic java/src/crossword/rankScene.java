@@ -36,7 +36,7 @@ class RankScene extends Scene{
 	private static TableView<RankRecord> ranktable = new TableView<RankRecord>();
 	private ObservableList<RankRecord> data = 
 			FXCollections.observableArrayList();
-	String file_path = "D:\\Study\\JAVA\\My projects\\ecilpse\\2018.9\\basic java\\resources\\rankinfo.dat";
+	String file_path = "D:\\Study\\JAVA\\My projects\\ecilpse\\git\\basic java\\resources\\rankinfo.dat";
 	Stage stage;
 	Button back;
 	

@@ -39,7 +39,7 @@ class GameScene extends Scene{
 	int rightNum = 0;
 	int wrongNum = 0;
 	boolean hasEdit = false;
-	String file_path = "D:\\Study\\JAVA\\My projects\\ecilpse\\2018.9\\basic java\\resources\\novels.dat";
+	String file_path = "D:\\Study\\JAVA\\My projects\\ecilpse\\git\\basic java\\resources\\novels.dat";
 	Stage stage;
 	
 	public GameScene(Stage stage) {
