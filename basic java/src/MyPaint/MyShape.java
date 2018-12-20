@@ -21,6 +21,8 @@ interface Copy{
 	public Shape deepCopy(double... points);
 	public double getPosX();
 	public double getPosY();
+	public double getArea();
+	public double getPerimeter();
 	public double[] getPos();
 	public String getID();
 	public double getwidth();
@@ -30,6 +32,7 @@ interface Copy{
 	public String getFillColor();
 	public double getLineWidth();
 	public Shape reply();
+	public void changeAttr(double lineWidth, Paint lineColor, Paint fillColor);
 	
 }
 
@@ -120,6 +123,24 @@ class MyRandomLine extends Line implements Serializable, Copy{
 	public Shape reply() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public double getArea() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double getPerimeter() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void changeAttr(double lineWidth, Paint lineColor, Paint fillColor) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	
@@ -234,6 +255,35 @@ class MyStraitLine extends Line implements Serializable, Copy{
 		return newShape;
 	}
 	
+	public String toString() {
+		return this.getID()+"[ pos=[startX="+(int)this.getPosX()+","
+				+ " StartY="+(int)this.getPosY()+", endX="+(int)this.pos[2]+", endY="+(int)this.pos[3]+"] length="+(int)this.getPerimeter()+
+				", strokeWidth="+(int)this.lineWidth+", stroke="+this.lineColor+", fill="+this.fillColor+"]";
+	}
+
+	@Override
+	public double getArea() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double getPerimeter() {
+		// TODO Auto-generated method stub
+		return Math.sqrt((this.pos[0]-this.pos[2])*(this.pos[0]-this.pos[2]) + (this.pos[1]-this.pos[3])*(this.pos[1]-this.pos[3]));
+	}
+
+	@Override
+	public void changeAttr(double lineWidth, Paint lineColor, Paint fillColor) {
+		// TODO Auto-generated method stub
+		this.setStrokeWidth(lineWidth);
+		this.setStroke(lineColor);
+		this.setFill(fillColor);
+		this.lineWidth = lineWidth;
+		this.lineColor = (lineColor==null?"":((Color)lineColor).toString() );
+		this.fillColor = (fillColor==null?"":((Color)fillColor).toString() );
+	}
+	
 	
 }
 
@@ -278,11 +328,11 @@ class MyRectangle extends Rectangle implements Serializable, Copy{
 	}
 	
 	public double getArea() {
-		return this.getWidth() * this.getHeight();
+		return (int)this.getWidth() * (int)this.getHeight();
 	}
 	
 	public double getPerimeter() {
-		return ( this.getWidth() + this.getHeight() ) * 2;
+		return ( (int)this.getWidth() + (int)this.getHeight() ) * 2;
 	}
 	
 	public Date getDate() {
@@ -316,9 +366,10 @@ class MyRectangle extends Rectangle implements Serializable, Copy{
 	}
 	
 	public String toString() {
-		return this.getID()+"[ pos=[x="+this.getPosX()+", y="+this.getPosY()+"] width="+this.width+
-				", height="+this.height+", strokeWidth="+this.lineWidth+
-				", stroke="+this.lineColor+", fill="+this.fillColor+", createDate="+this.createDate+"]";
+		return 
+		this.getID()+"[ pos=[x="+(int)this.getPosX()+", y="+(int)this.getPosY()+"] width="+(int)this.width+", height="+(int)this.height+
+		", area="+(int)this.getArea()+", perimeter="+(int)this.getPerimeter()+
+		", strokeWidth="+(int)this.lineWidth+", stroke="+this.lineColor+", fill="+this.fillColor+"]";
 	}
 	
 	@Override
@@ -350,6 +401,29 @@ class MyRectangle extends Rectangle implements Serializable, Copy{
 	public double getradius() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("method not support");
+	}
+
+
+
+	@Override
+	public void changeAttr(double lineWidth, Paint lineColor, Paint fillColor) {
+		// TODO Auto-generated method stub
+		this.setStrokeWidth(lineWidth);
+		this.setStroke(lineColor);
+		this.setFill(fillColor);
+		this.lineWidth = lineWidth;
+		this.lineColor = (lineColor==null?"":((Color)lineColor).toString() );
+		this.fillColor = (fillColor==null?"":((Color)fillColor).toString() );
+	}
+	
+	public Rectangle resize() {
+		Rectangle rect = new Rectangle(this.getPosX(), this.getPosY(), this.width, this.height);
+		rect.setStrokeDashOffset(10);
+		rect.setFill(null);
+		rect.getStrokeDashArray().addAll(5d,5d,5d,5d);
+		rect.setStroke(((Color)this.getStroke()).invert());
+		
+		return rect;
 	}
 	
 }
@@ -498,8 +572,39 @@ class MyCircle extends Circle implements Serializable, Copy{
 	}
 	
 	public String toString() {
-		return this.getID()+"[ pos=[x="+this.getPosX()+", y="+this.getPosY()+"] radius="+this.radius+", strokeWidth="+this.lineWidth+
+		return this.getID()+"[ pos=[x="+(int)this.getPosX()+", y="+(int)this.getPosY()+"] radius="+(int)this.radius+
+				", area="+this.getArea()+
+				", strokeWidth="+this.lineWidth+
 				", stroke="+this.lineColor+", fill="+this.fillColor+", createDate="+this.createDate+"]";
+	}
+
+
+
+	@Override
+	public double getArea() {
+		// TODO Auto-generated method stub
+		return Math.PI*(int)this.radius*(int)this.radius;
+	}
+
+
+
+	@Override
+	public double getPerimeter() {
+		// TODO Auto-generated method stub
+		return 2*Math.PI*(int)this.radius;
+	}
+
+
+
+	@Override
+	public void changeAttr(double lineWidth, Paint lineColor, Paint fillColor) {
+		// TODO Auto-generated method stub
+		this.setStrokeWidth(lineWidth);
+		this.setStroke(lineColor);
+		this.setFill(fillColor);
+		this.lineWidth = lineWidth;
+		this.lineColor = (lineColor==null?"":((Color)lineColor).toString() );
+		this.fillColor = (fillColor==null?"":((Color)fillColor).toString() );
 	}
 	
 }
@@ -529,6 +634,7 @@ class MyText extends Text implements Serializable, Copy{
 		this.fontFamily = font.getFamily();
 		this.size = font.getSize();
 		this.text = text;
+		
 		//System.out.println(Font.getFamilies());
 	}
 
@@ -635,12 +741,51 @@ class MyText extends Text implements Serializable, Copy{
 	
 	
 	public String toString() {
-		return this.getID()+"[ pos=[x="+this.getPosX()+", y="+this.getPosY()+"] "+" text="+this.text+" size="+this.size+", strokeWidth="+this.lineWidth+
+		return this.getID()+"[ pos=[x="+(int)this.getPosX()+", y="+(int)this.getPosY()+"] "+" text="+this.text+" size="+this.size+", strokeWidth="+this.lineWidth+
 				", stroke="+this.lineColor+", fill="+this.fillColor+", createDate="+this.createDate+"]";
+	}
+
+
+
+	@Override
+	public double getArea() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+
+	@Override
+	public double getPerimeter() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	
+	public void changeTextAttr(double lineWidth, double size, String fontFamily, Paint lineColor, Paint fillColor) {
+		this.setStrokeWidth(lineWidth);
+		this.setStroke(lineColor);
+		this.setFill(fillColor);
+		this.setFont( new Font(fontFamily, size) );
+		this.lineWidth = lineWidth;
+		this.size = size;
+		this.fontFamily = fontFamily;
+		this.lineColor = (lineColor==null?"":((Color)lineColor).toString() );
+		this.fillColor = (fillColor==null?"":((Color)fillColor).toString() );
+	}
+
+	@Override
+	public void changeAttr(double lineWidth, Paint lineColor, Paint fillColor) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 
 class MyEllipse extends Ellipse implements Serializable, Copy{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private double[] pos;
 	private Date createDate;
 	protected double lineWidth, radiusX, radiusY;
@@ -648,6 +793,9 @@ class MyEllipse extends Ellipse implements Serializable, Copy{
 	
 	public MyEllipse(double x, double y, double radiusX, double radiusY, double lineWidth, Paint lineColor, Paint fillColor) {
 		super(x, y, radiusX, radiusY);
+		this.setStroke(lineColor);
+		this.setFill(fillColor);
+		this.setStrokeWidth(lineWidth);
 		this.radiusX = radiusX;
 		this.radiusY = radiusY;
 		this.createDate = new Date();
@@ -657,19 +805,7 @@ class MyEllipse extends Ellipse implements Serializable, Copy{
 		this.fillColor = ( fillColor==null?"":((Color)lineColor).toString() );
 	}
 
-	@Override
-	public Shape deepCopy(double x, double y) {
-		// TODO Auto-generated method stub
-		MyEllipse newShape = new MyEllipse(x, y, this.radiusX, this.radiusY,
-				this.lineWidth, this.getStroke(), this.getFill());
-		return newShape;
-	}
-
-	@Override
-	public Shape deepCopy(double... points) {
-		// TODO Auto-generated method stub
-		return this.deepCopy(this.pos[0], this.pos[1]);
-	}
+	
 
 	@Override
 	public double getPosX() {
@@ -741,6 +877,57 @@ class MyEllipse extends Ellipse implements Serializable, Copy{
 		newShape.createDate = this.createDate;
 		return newShape;
 	}
+	
+	@Override
+	public Shape deepCopy(double x, double y) {
+		// TODO Auto-generated method stub
+		MyEllipse newShape = new MyEllipse(x, y, this.radiusX, this.radiusY,
+				this.lineWidth, this.getStroke(), this.getFill());
+		newShape.createDate = this.createDate;
+		System.out.println("new Ellipse:"+newShape.toString());
+		return newShape;
+	}
+
+	@Override
+	public Shape deepCopy(double... points) {
+		// TODO Auto-generated method stub
+		return this.deepCopy(points[0], points[1]);
+	}
+	
+	public String toString() {
+		return this.getID()+"[ pos=[x="+(int)this.getPosX()+", y="+(int)this.getPosY()+"] "+" Xradius="+(int)this.radiusX+
+			" Yradius="+(int)this.radiusY+", area="+(int)this.getArea()+", perimeter="+(int)this.getPerimeter()+
+			", strokeWidth="+this.lineWidth+", stroke="+this.lineColor+", fill="+this.fillColor+", createDate="+this.createDate+"]";
+	}
+
+
+
+	@Override
+	public double getArea() {
+		// TODO Auto-generated method stub
+		return (int)this.radiusX*(int)this.radiusY*Math.PI;
+	}
+
+
+
+	@Override
+	public double getPerimeter() {
+		// TODO Auto-generated method stub
+		return 4*((int)this.radiusX+(int)this.radiusY - (4-Math.PI)*((int)this.radiusX*(int)this.radiusY)/((int)this.radiusX+(int)this.radiusY));
+	}
+
+
+
+	@Override
+	public void changeAttr(double lineWidth, Paint lineColor, Paint fillColor) {
+		// TODO Auto-generated method stub
+		this.setStrokeWidth(lineWidth);
+		this.setStroke(lineColor);
+		this.setFill(fillColor);
+		this.lineWidth = lineWidth;
+		this.lineColor = ( lineColor==null?"":((Color)lineColor).toString() );
+		this.fillColor = ( fillColor==null?"":((Color)fillColor).toString() );
+	}
 
 	
 	
@@ -801,13 +988,13 @@ class MyPolygon extends Polygon implements Serializable ,Copy{
 	@Override
 	public double getPosX() {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("method unsupport");
+		return this.pos[0];
 	}
 
 	@Override
 	public double getPosY() {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("method unsupport");
+		return this.pos[1];
 	}
 
 	@Override
@@ -864,9 +1051,41 @@ class MyPolygon extends Polygon implements Serializable ,Copy{
 	public String toString() {
 		String pos = "";
 		for ( double p:this.pos) {
-			pos += p+" ";
+			pos += (int)p+" ";
 		}
-		return this.getID()+"[ pos=["+pos+"] , strokeWidth="+this.lineWidth+
-				", stroke="+this.lineColor+", fill="+this.fillColor+", createDate="+this.createDate+"]";
+		return this.getID()+"[ pos=["+pos+"] area="+(int)this.getArea()+", perimeter="+(int)this.getPerimeter()+
+				", strokeWidth="+this.lineWidth+", stroke="+this.lineColor+", fill="+this.fillColor+", createDate="+this.createDate+"]";
+	}
+
+	@Override
+	public double getArea() {
+		// TODO Auto-generated method stub
+		double p = this.getPerimeter();
+		return Math.sqrt(p*
+				(p-Math.sqrt((this.pos[0]-this.pos[2])*(this.pos[0]-this.pos[2])+(this.pos[1]-this.pos[2])*(this.pos[0]-this.pos[3])))*
+				(p-Math.sqrt((this.pos[2]-this.pos[4])*(this.pos[2]-this.pos[4])+(this.pos[3]-this.pos[5])*(this.pos[3]-this.pos[5])))*
+				(p-Math.sqrt((this.pos[4]-this.pos[0])*(this.pos[4]-this.pos[0])+(this.pos[5]-this.pos[1])*(this.pos[5]-this.pos[1]))));
+	}
+
+	@Override
+	public double getPerimeter() {
+		// TODO Auto-generated method stub
+		double p = 0;
+		for (int i = 0; i < this.pos.length; i+=2) {
+			p += Math.sqrt((this.pos[i]-this.pos[(i+2)%this.pos.length])*(this.pos[i]-this.pos[(i+2)%this.pos.length]) + 
+					(this.pos[i+1]-this.pos[(i+3)%this.pos.length])*(this.pos[i+1]-this.pos[(i+3)%this.pos.length]));
+		}
+		return p;
+	}
+
+	@Override
+	public void changeAttr(double lineWidth, Paint lineColor, Paint fillColor) {
+		// TODO Auto-generated method stub
+		this.setStrokeWidth(lineWidth);
+		this.setStroke(lineColor);
+		this.setFill(fillColor);
+		this.lineWidth = lineWidth;
+		this.lineColor = ( lineColor==null?"":((Color)lineColor).toString() );
+		this.fillColor = ( fillColor==null?"":((Color)fillColor).toString() );
 	}
 }

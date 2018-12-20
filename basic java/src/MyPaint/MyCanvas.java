@@ -5,16 +5,21 @@ package MyPaint;
 
 import java.util.ArrayList;
 
+import javafx.beans.property.Property;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -38,9 +43,12 @@ final class MyCanvas extends Pane {
 	private static winattr attr = new winattr();
 	private static ArrayList<Shape> allChosedShapes;
 	private static TextArea canvasInfo = null;
+	private static VBox operatePane;
+	private static Stage stage;
 	
 	public MyCanvas(Stage stage, ToolsPane tool) {
 		super();
+		this.stage = stage;
 		this.tool = tool;
 		this.lineType = tool.lineTypeProperty();
 		this.prefWidthProperty().bind(stage.widthProperty().divide(1.1));
@@ -59,17 +67,8 @@ final class MyCanvas extends Pane {
 		});
 	}
 	
-	public MyCanvas(Stage stage, double width, double height) {
-		super();
-		this.setWidth(width);
-		this.setHeight(height);
-		this.setViewOrder(5);
-		this.bindEvents4Canvas();
-	}
-	
 	@SuppressWarnings("static-access")
 	public void bindEvents4Canvas() {
-		
 		this.setOnMouseMoved(moveEvt->{
 			this.canvasInfo.setText("x:"+(int)moveEvt.getX()+", y:"+(int)moveEvt.getY());
 			for ( Shape s:this.allChosedShapes) {
@@ -78,6 +77,15 @@ final class MyCanvas extends Pane {
 		});
 		
 		this.setOnMousePressed(pe->{
+			if ( this.getChildren().contains(this.operatePane)) {
+				this.getChildren().remove(this.operatePane);
+			}
+			if (pe.isSecondaryButtonDown()) {
+				System.out.println("primary down");
+				this.operatePane = this.createOperatePanel(pe.getX(), pe.getY());
+				this.getChildren().add(this.operatePane);
+				return ;
+			}
 			this.startPaint = true;
 			//System.out.println("start");
 			this.x = pe.getX();
@@ -95,7 +103,20 @@ final class MyCanvas extends Pane {
 				}else {
 					this.input = new TextArea();
 					this.input.setPrefHeight(this.tool.getSelectedFontSize());
-					this.input.setPrefWidth(30);
+					this.input.setPrefWidth(3);
+					this.input.setStyle("-fx-background-color:Transparent");
+					
+					this.input.setOnKeyPressed(e->{
+						this.input.setFont(new Font(this.tool.getSelectedFontFamily(), this.tool.getSelectedFontSize()));
+						if ( e.getCode() == KeyCode.ENTER) {
+							this.input.setPrefHeight(this.input.getHeight()+this.tool.getSelectedFontSize());
+						}else {
+							this.input.setPrefWidth(this.input.getWidth()+8);
+						}
+						
+						//
+						System.out.println("aaa");
+					});
 					this.input.setTranslateX(this.x);
 					this.input.setTranslateY(this.y);
 					this.getChildren().add(this.input);
@@ -208,17 +229,39 @@ final class MyCanvas extends Pane {
 				this.clickedTimes = 0;
 			}
 			
-			
-			
 			MyCanvas.clickedTimes ++;
-			//System.out.println("i am clicked by mouse "+MyCanvas.clickedTimes+" times "
-			//		+ " X:"+((Copy)shape).getPosX() + " Y:"+((Copy)shape).getPosY());
 			if ( MyCanvas.clickedTimes == 1) {
 				this.x = clickEvt.getX();
 				this.y = clickEvt.getY();
 				shape.setEffect(attr.ds);
 				if ( !this.allChosedShapes.contains(shape) ) {
 					this.allChosedShapes.add((Shape) shape);
+				
+					for ( int i = 0; i < 4; i++) {
+						MyRectangle c = new MyRectangle(0, 0, ((Copy)shape).getLineWidth(), ((Copy)shape).getLineWidth(), 1, Color.RED, Color.RED);
+						if (i == 0) {
+							c.setTranslateX(((Copy)shape).getPosX());
+							c.setTranslateY(((Copy)shape).getPosY());
+						}else if (i==1) {
+							c.setTranslateX(((Copy)shape).getPosX() + ((Copy)shape).getwidth());
+							c.setTranslateY(((Copy)shape).getPosY());
+						}else if (i==2) {
+							c.setTranslateX(((Copy)shape).getPosX());
+							c.setTranslateY(((Copy)shape).getPosY() + ((Copy)shape).getheight());
+						}else if (i==3) {
+							c.setTranslateX(((Copy)shape).getPosX() + ((Copy)shape).getwidth());
+							c.setTranslateY(((Copy)shape).getPosY() + ((Copy)shape).getheight());
+						}
+						c.setOnMouseDragged(e->{
+							System.out.println("aaa");
+							shape.setTranslateX(((Copy)shape).getPosX()+e.getX()-c.getPosX());
+							shape.setTranslateY(((Copy)shape).getPosY()+e.getY()-c.getPosY());
+						});
+						this.getChildren().add(c);
+						
+					}
+					
+					
 				} 
 				this.chosedShape = (Shape)shape;
 				return;
@@ -252,14 +295,11 @@ final class MyCanvas extends Pane {
 				for (int i = 0; i < points.length; i += 2) {
 					points[i] = pos[i]+offsetX;
 					points[i+1] = pos[i+1]+offsetY;
-					//System.out.println("x:"+points[i]+"  y:"+points[i+1]);
 				}
-				//System.out.println("points.len:"+points.length +"  offsetX:"+offsetX+"  offsetY:"+offsetY+"  this.x:"+this.x+"  this.y:"+this.y);
 	
 				Shape newShape = ((Copy) shape).deepCopy( points );
 				
 				this.dragged = newShape;
-				
 				this.dragged.setEffect(attr.ds);
 				this.getChildren().add(newShape);
 				shape.setVisible(false);
@@ -268,22 +308,16 @@ final class MyCanvas extends Pane {
 		});
 
 		shape.setOnMouseReleased(releaseEvt->{
-			//System.out.println("release on rect");
-			
 			if ( !MyCanvas.isChosedShape ) {
 				return;
 			}
-			
-			 
-			
+		
 			if ( this.dragged != null) {
 				this.dragged.setEffect(null);
 				this.getChildren().remove(this.chosedShape);
 				this.allChosedShapes.remove(this.chosedShape);
 			}else {
-				this.chosedShape.setEffect(null);
-				//this.allChosedShapes.remove(this.chosedShape);
-				
+				this.chosedShape.setEffect(null);			
 			}
 			
 			if ( this.allChosedShapes.contains(this.chosedShape) && this.chosedShape.getEffect() == null) {
@@ -297,7 +331,6 @@ final class MyCanvas extends Pane {
 			this.dragged = null;
 		});		
 	}
-	
 	
 	/*
 	* setWidth和setHeight方法会导致死循环所以导致栈溢出问题
@@ -365,8 +398,6 @@ final class MyCanvas extends Pane {
 		return this.allChosedShapes;
 	}
 	
-	
-	
 	public void createCanvasInfoLabel(Stage stage) {
 		this.canvasInfo = new TextArea();
 		this.canvasInfo.setText("info");
@@ -401,5 +432,61 @@ final class MyCanvas extends Pane {
 		}
 		this.allChosedShapes.clear();
 	}
+
 	
+	public void changeChosedShapes() {
+		if ( this.allChosedShapes == null)
+			return;
+		for ( Shape s: this.allChosedShapes) {
+			if ( s instanceof MyText) {
+				((MyText)s).changeTextAttr(this.tool.getSelectedLineType(), this.tool.getSelectedFontSize()
+						, this.tool.getSelectedFontFamily(), tool.getSelectedForeColor(), this.tool.getSelectedBackColor() );
+				continue;
+			}
+			((Copy)s).changeAttr(this.tool.getSelectedLineType(), this.tool.getSelectedForeColor(), this.tool.getSelectedBackColor());
+		}
+		
+	}
+
+	public VBox createOperatePanel(double x, double y) {
+		VBox p = new VBox();
+		Button deleteBtn = new Button("删除");
+		deleteBtn.setOnAction(e->{
+			this.deleteChosedShapes();
+			//p.getChildren().remove(deleteBtn);
+			this.getChildren().remove(this.operatePane);
+			System.out.println("del done");
+		});
+		Button saveBtn = new Button("保存");
+		saveBtn.setOnAction(e->{
+			test t = new test();
+			t.saveShape(this.stage, this.allChosedShapes);
+			this.getChildren().remove(this.operatePane);
+		});
+		Button readBtn = new Button("读取");
+		readBtn.setOnAction(e->{
+			test t = new test();
+			t.readShape(stage);
+			this.getChildren().remove(this.operatePane);
+		});
+		Button clearBtn = new Button("清屏");
+		clearBtn.setOnAction(e->{
+			this.getChildren().clear();
+			
+		});
+		ButtonStyle.setAllButtonsStyle(new Node[] {deleteBtn, saveBtn, readBtn, clearBtn}, "-fx-background-color:#ffffff;-fx-background-radius:0,0,0,0");
+		p.getChildren().add(deleteBtn);
+		p.setMargin(deleteBtn, new Insets(2,2,0,2));
+		p.getChildren().add(saveBtn);
+		p.setMargin(saveBtn, new Insets(2,2,2,2));
+		p.getChildren().add(readBtn);
+		p.setMargin(readBtn, new Insets(0,2,2,2));
+		p.getChildren().add(clearBtn);
+		p.setMargin(clearBtn, new Insets(0,2,2,2));
+		p.setTranslateX(x);
+		p.setTranslateY(y);
+		p.setStyle("-fx-background-color:#999999");
+		
+		return p;
+	}
 }

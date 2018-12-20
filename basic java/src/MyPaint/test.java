@@ -23,6 +23,7 @@ import javafx.scene.effect.SepiaTone;
 import javafx.scene.effect.Shadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -54,6 +55,7 @@ public class test extends Application{
 	@Override
 	public void start(Stage stage) throws Exception {
 		// TODO Auto-generated method stub
+		
 		initStage(stage);
 		
 		VBox mainPane = new VBox();
@@ -66,11 +68,13 @@ public class test extends Application{
 		mainPane.getChildren().add(menuBar);
 		mainPane.setMargin(menuBar, new Insets(5,5,5,5));
 		
+		
 		ToolsPane toolsBar = this.createToolsBar(stage);
 		mainPane.getChildren().add(toolsBar);
 		mainPane.setMargin(toolsBar, new Insets(5,5,5,5));
 		
 		canvas = this.createMyCanvas(stage, toolsBar);
+		toolsBar.setCanvas(canvas);
 		mainPane.getChildren().add(canvas);
 		mainPane.setMargin(canvas, new Insets(5,5,1,5));
 		
@@ -81,7 +85,9 @@ public class test extends Application{
 		
 		mainPane.setOnKeyPressed(e->{
 			//this.canvas.deleteChosedShapes();
-			System.out.println("del ok");
+			if ( e.getCode() == KeyCode.A) {
+				System.out.println("del");
+			}
 		});
 		
 		stage.setAlwaysOnTop(true);
@@ -98,9 +104,6 @@ public class test extends Application{
 		//在菜单栏中添加菜单:文件菜单 ==> 创建文件、保存文件、退出
 		Menu fileMenu = new Menu("文件");
 		String iconpath;
-		//MenuItem newFileItem = new MenuItem("新建");
-		//String iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/addfile_16px.png";
-		//newFileItem.setGraphic(new ImageView(iconpath));
 		
 		MenuItem openFileItem = new MenuItem("打开");
 		iconpath = "file:///D:/Study/JAVA/My%20projects/ecilpse/git/basic%20java/resources/openfile_16px.png";
@@ -116,7 +119,7 @@ public class test extends Application{
 			//System.out.println(canvas.getAllChosedShape());
 			this.allShapeChosed = this.canvas.getAllChosedShape();
 			System.out.println("Chosed size:"+this.canvas.getAllChosedShape().size());
-			this.saveShape(stage);
+			this.saveShape(stage, this.allShapeChosed);
 		});
 		
 		MenuItem exitItem = new MenuItem("退出");
@@ -142,7 +145,7 @@ public class test extends Application{
 	//以上功能的实现：
 	//
 	public ToolsPane createToolsBar(Stage stage) {
-		ToolsPane tools = new ToolsPane(stage);
+		ToolsPane tools = new ToolsPane(stage, canvas);
 		return tools;
 	}
 	
@@ -181,7 +184,7 @@ public class test extends Application{
 	
 	//点击形状时，弹出文件选择器，并进行文件保存
 	@SuppressWarnings("deprecation")
-	public void saveShape(Stage stage) {
+	public void saveShape(Stage stage, ArrayList<Shape> objList) {
 		if (this.canvas.getAllChosedShape().size() == 0)
 			return;
 		FileChooser filePicker = new FileChooser();
@@ -194,12 +197,10 @@ public class test extends Application{
 		//filePicker.showOpenDialog(stage);
 		if ( f == null) {
 			//默认保存在项目的根目录下
-			Date date = new Date();
-			f = new File("Shape_"+date.getYear()+"_"+date.getMonth()+"_"+date.getDay()+
-					"_"+date.getHours()+"_"+date.getMinutes()+"_"+date.getSeconds()+".shape");
+			return;
 		}
-		WRObject2File.writeObject2File(this.allShapeChosed, f.getPath());
-		System.out.println("write path:"+f.getPath());
+		WRObject2File.writeObject2File(objList, f.getPath());
+		System.out.println("write path:"+f.getName());
 	}
 	
 	//读取已经保存的形状对象

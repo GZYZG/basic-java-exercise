@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
@@ -33,12 +34,18 @@ final class winattr{
 final class ButtonStyle{
 	private static String defaultStyle = "-fx-background:transparent;-fx-background-radius:35;-fx-border-radius:55"
 			+ ";-fx-font-size:10px";
-	public static void setButtonStyle(Button btn) {
+	public static void setButtonStyle(Node btn) {
 		ButtonStyle.setButtonStyle(btn, ButtonStyle.defaultStyle);
 	}
 	
-	public static void setButtonStyle(Button btn, String style) {
+	public static void setButtonStyle(Node btn, String style) {
 		btn.setStyle(style);
+	}
+	
+	public static void setAllButtonsStyle(Node[] nodes, String style) {
+		for ( Node node:nodes) {
+			ButtonStyle.setButtonStyle(node, style);
+		}
 	}
 
 }
